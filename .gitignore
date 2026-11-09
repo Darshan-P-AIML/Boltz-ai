@@ -36,6 +36,8 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Local data and database files
-data/
+# Local data and database files (root only, preserve src/data)
+/data/
+!src/data/
+!src/data/**
 *.db

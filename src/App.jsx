@@ -18,7 +18,7 @@ import { SkeletonGrid, ErrorState } from './components/SkeletonLoader';
 import GeometricBackground from './components/GeometricBackground';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 
-import { initialTeammateRequests, initialHackathons } from './data/hackathons';
+import { initialTeammateRequests, initialHackathons } from './data/hackathons.js';
 import { getCurrentUser } from './services/auth';
 import { fetchEventsService, getUpcomingDeadlines } from './services/events';
 import { calculateRecommendationScore, sortEventsByRecommendation } from './services/recommendation';

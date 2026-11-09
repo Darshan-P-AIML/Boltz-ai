@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Sparkles, Send } from './Icons';
-import { CATEGORIES, MODES } from '../data/hackathons';
+import { CATEGORIES, MODES } from '../data/hackathons.js';
 import confetti from 'canvas-confetti';
 
 export default function SubmitModal({ onClose, onSubmitHackathon }) {

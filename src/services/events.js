@@ -1,6 +1,6 @@
 // BOLTZ AI Events Service Layer
 
-import { initialHackathons } from '../data/hackathons';
+import { initialHackathons } from '../data/hackathons.js';
 
 /**
  * Fetches hackathons from REST API or falls back to verified client seed dataset.

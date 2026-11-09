@@ -86,5 +86,8 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true
+  },
+  resolve: {
+    extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json']
   }
 });

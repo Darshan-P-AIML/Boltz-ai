@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Search, SlidersHorizontal, RotateCcw } from './Icons';
-import { CATEGORIES, LOCATIONS, MODES } from '../data/hackathons';
+import { CATEGORIES, LOCATIONS, MODES } from '../data/hackathons.js';
 
 export default function FilterBar({
   searchQuery,
