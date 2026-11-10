@@ -20,7 +20,7 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 
 import { initialTeammateRequests, initialHackathons } from './data/hackathons.js';
 import { getCurrentUser } from './services/auth';
-import { fetchEventsService, getUpcomingDeadlines } from './services/events';
+import { fetchEventsService, getUpcomingDeadlines, deriveSections, deriveStats } from './services/events';
 import { calculateRecommendationScore, sortEventsByRecommendation } from './services/recommendation';
 import { Sparkles, SearchX, Globe, Heart, Clock, Trophy, MapPin, User, CheckCircle2 } from './components/Icons';
 
@@ -105,30 +105,40 @@ export default function App() {
         limit: 12
       });
 
-      setHackathons(data.items || []);
+      const resolvedItems = data.items && data.items.length > 0 ? data.items : initialHackathons;
+      setHackathons(resolvedItems);
       setTotalPages(data.totalPages || 1);
 
-      // Fetch Sections
+      // Fetch Sections — fall back to client-side derivation if API unavailable (e.g. Vercel)
+      let resolvedSections = null;
       try {
         const secRes = await fetch('/api/hackathons/sections');
         if (secRes.ok) {
           const secData = await secRes.json();
-          setSections(secData);
+          resolvedSections = secData;
         }
       } catch (e) {}
+      setSections(resolvedSections || deriveSections(resolvedItems));
 
-      // Fetch Platform Stats
+      // Fetch Platform Stats — fall back to client-side derivation if API unavailable
       try {
         const statsRes = await fetch('/api/stats');
         if (statsRes.ok) {
           const statsData = await statsRes.json();
           setStats(statsData);
+        } else {
+          setStats(deriveStats(resolvedItems));
         }
-      } catch (e) {}
+      } catch (e) {
+        setStats(deriveStats(resolvedItems));
+      }
 
     } catch (err) {
       console.error('Error loading BOLTZ AI events data:', err);
-      setHackathons(initialHackathons);
+      const fallback = initialHackathons;
+      setHackathons(fallback);
+      setSections(deriveSections(fallback));
+      setStats(deriveStats(fallback));
     } finally {
       setLoading(false);
     }

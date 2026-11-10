@@ -3,6 +3,75 @@
 import { initialHackathons } from '../data/hackathons.js';
 
 /**
+ * Derives homepage sections purely from a local hackathon dataset.
+ * Used as a fallback when /api/hackathons/sections is unavailable (e.g. Vercel).
+ */
+export function deriveSections(items = initialHackathons) {
+  const now = new Date();
+  const openItems = items.filter((i) => i.status !== 'CLOSED');
+
+  return {
+    trending: [...openItems]
+      .sort((a, b) => (b.prizeNumeric || 0) - (a.prizeNumeric || 0))
+      .slice(0, 6),
+    closingSoon: [...openItems]
+      .filter((i) => i.registrationDeadline && new Date(i.registrationDeadline) > now)
+      .sort((a, b) => new Date(a.registrationDeadline) - new Date(b.registrationDeadline))
+      .slice(0, 6),
+    aiMl: openItems.filter((i) =>
+      i.tracks.some((t) => t.toLowerCase().includes('ai') || t.toLowerCase().includes('machine')) ||
+      i.technologies.some((t) => t.toLowerCase().includes('python') || t.toLowerCase().includes('pytorch'))
+    ).slice(0, 6),
+    softwareWeb: openItems.filter((i) =>
+      i.tracks.some((t) => t.toLowerCase().includes('web') || t.toLowerCase().includes('software')) ||
+      i.technologies.some((t) => t.toLowerCase().includes('react') || t.toLowerCase().includes('javascript'))
+    ).slice(0, 6),
+    cybersecurity: openItems.filter((i) =>
+      i.tracks.some((t) => t.toLowerCase().includes('cyber') || t.toLowerCase().includes('security'))
+    ).slice(0, 6),
+    cloudDevops: openItems.filter((i) =>
+      i.tracks.some((t) => t.toLowerCase().includes('cloud') || t.toLowerCase().includes('devops'))
+    ).slice(0, 6),
+    web3: openItems.filter((i) =>
+      i.tracks.some((t) =>
+        t.toLowerCase().includes('web3') ||
+        t.toLowerCase().includes('blockchain') ||
+        t.toLowerCase().includes('crypto')
+      )
+    ).slice(0, 6),
+    student: openItems.filter((i) => i.studentFriendly).slice(0, 6),
+    nearYou: openItems.filter((i) => i.mode === 'In-Person' || i.mode === 'Hybrid').slice(0, 6)
+  };
+}
+
+/**
+ * Derives platform statistics purely from a local hackathon dataset.
+ * Used as a fallback when /api/stats is unavailable (e.g. Vercel).
+ */
+export function deriveStats(items = initialHackathons) {
+  const openItems = items.filter((i) => i.status !== 'CLOSED');
+  const totalPrizeSum = items.reduce((acc, curr) => acc + (curr.prizeNumeric || 0), 0);
+  const cities = [...new Set(items.map((i) => i.city).filter((c) => c && c !== 'Online'))];
+  const totalParticipants = items.reduce((acc, curr) => {
+    const num = parseInt(String(curr.participants).replace(/[^0-9]/g, ''), 10) || 0;
+    return acc + num;
+  }, 0);
+
+  let prizeFormatted = `₹${(totalPrizeSum / 100000).toFixed(0)} Lakhs+`;
+  if (totalPrizeSum >= 10000000) {
+    prizeFormatted = `₹${(totalPrizeSum / 10000000).toFixed(1)} Crore+`;
+  }
+
+  return {
+    totalActiveHackathons: openItems.length || items.length,
+    totalPrizeSum,
+    totalPrizeSumFormatted: prizeFormatted,
+    totalCities: cities.length || 12,
+    totalParticipantsFormatted: `${(totalParticipants / 1000).toFixed(0)}k+`
+  };
+}
+
+/**
  * Fetches hackathons from REST API or falls back to verified client seed dataset.
  */
 export async function fetchEventsService(filters = {}) {
